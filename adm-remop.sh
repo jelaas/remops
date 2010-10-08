@@ -16,7 +16,10 @@ REMOPDIR=REMOPDIR
 REMOPUSER=REMOPUSER
 
 if [ "$1" == init ]; then
-    [ "$USER" = "$REMOPUSER" ] || (echo "You are not the administrative remop user '$REMOPUSER'";exit 1)
+    if [ "$USER" != "$REMOPUSER" ]; then
+	echo "You are not the administrative remop user '$REMOPUSER'"
+	exit 1
+    fi
     if ! mkdir -p $REMOPDIR/etc $REMOPDIR/keys $REMOPDIR/req; then
 	echo "Cannot create $REMOPDIR/etc $REMOPDIR/keys $REMOPDIR/req"
 	exit 1
@@ -31,7 +34,10 @@ fi
 
 if [ "$1" == newkey ]; then
     ROLE="$2"
-    [ "$ROLE" ] || (echo "Need ROLE as argument"; exit 2)
+    if [ -z "$ROLE" ]; then
+	echo "Need ROLE as argument"
+	exit 2
+    fi
     (umask 0077;ssh-keygen -b 2048 -t rsa -f rsa_$ROLE)
     echo "Created key rsa_$ROLE"
     exit 0
@@ -52,7 +58,10 @@ if [ "$1" == req ]; then
 fi
 
 if [ "$1" == bless ]; then
-    [ "$USER" = "$REMOPUSER" ] || (echo "You are not the administrative remop user '$REMOPUSER'";exit 1)
+    if [ "$USER" != "$REMOPUSER" ]; then
+	echo "You are not the administrative remop user '$REMOPUSER'"
+	exit 1
+    fi
     [ -f $REMOPDIR/etc/key.pem ] || exit 2
     RUSER="$2"
     ROLE="$3"
