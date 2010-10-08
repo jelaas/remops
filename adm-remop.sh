@@ -30,6 +30,7 @@ if [ "$1" == newkey ]; then
     ROLE="$2"
     [ "$ROLE" ] || (echo "Need ROLE as argument"; exit 2)
     (umask 0077;ssh-keygen -b 2048 -t rsa -f rsa_$ROLE)
+    echo "Created key rsa_$ROLE"
     exit 0
 fi
 
@@ -63,3 +64,23 @@ if [ "$1" == bless ]; then
     logger -i -p syslog.info "$USER:bless:$RUSER:$ROLE:"
     exit 0
 fi
+
+cat <<EOF
+User:
+=====
+adm-remop newkey <role>
+ Create a new RSA ssh key pair for <role>. Key store in current working dir.
+
+adm-remop req <role> <keyfile>
+ Create a request for authorization.
+
+Administrator:
+==============
+adm-remop bless <user> <role>
+ Accept an authorization request.
+
+adm-remop init
+ Initialize repository and create the repository RSA key pair.
+
+EOF
+

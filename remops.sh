@@ -24,6 +24,15 @@ if [ ! -d "$REMOPS" ]; then
     mkdir -p $REMOPS/roles/public/manual_keys
 fi
 
+if [ -z "$1" ]; then
+    cat <<EOF
+remops <user> <role>
+ENV: SSH_ORIGINAL_COMMAND=<cmd> [arg]*
+
+EOF
+    exit 0
+fi
+
 RUSER="$1"
 RROLE="$2"
 CMD="${SSH_ORIGINAL_COMMAND%% *}" # first word before space

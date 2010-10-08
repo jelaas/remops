@@ -14,6 +14,13 @@ KEYS=$REMOPDIR/keys
 
 RUSER=$USER
 
+if [ -z "$1" ]; then
+    cat <<EOF
+remop [-l<user>|-l <user>] [<role>@]<host> <command>
+EOF
+    exit 0
+fi
+
 [ "$1" = "-l" ] && RUSER="$2" && shift 2
 [ "${1:0:2}" = "-l" ] && RUSER="${1:2}" && shift
 

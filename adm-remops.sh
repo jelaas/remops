@@ -147,4 +147,23 @@ if [ "$1" = init -a "$2" ]; then
     exit
 fi
 
-echo "help!!"
+cat <<EOF
+adm-remops add manual <user> <role> <keyfile>
+   Add a manually managed key to server. 
+
+adm-remops add managed <user> <role>
+   Fetch and add a managed key.
+
+adm-remops sync check
+   Display what changes a sync would perform.
+
+adm-remops sync now
+   Sync managed keys with operations server.
+
+adm-remops commit
+   Commit keys in local repository to Authorized_keys.
+
+adm-remops init <base_url>
+   Initialize and set base URL for operations server.
+
+EOF
