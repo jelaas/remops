@@ -1,0 +1,70 @@
+Remote Operations framework
+
+Framework for remote operations. Based on bash, wget and ssh.
+
+The framework provides a structure for implementing commands that are made
+for remote execution.
+
+The framework provides support for:
+* Roles
+* Authentication
+* Authorization (via roles)
+* Centralized user,key and role management
+* Support for locally managed authorization.
+  Each administrator of a destination server may opt in or out
+  of the centralized management. Or use a mix of both.
+
+Key features:
+* The local admin of a destination retains full control over access.
+
+In remops we have one machine/server for centralized management. This is referred to as the 'operations server'. A server that is setup to execute the remote operations is called the 'destination server'.
+
+Access administration is performed centrally on the operations server (managed keys) or locally on the destination server (manual keys).
+
+
+Administration of access to destination server
+==============================================
+
+adm-remops add manual <user> <role> <keyfile>
+   Add a manually managed key to server. 
+
+adm-remops add managed <user> <role>
+   Fetch and add a managed key.
+
+adm-remops sync check
+   Display what changes a sync would perform.
+
+adm-remops sync now
+   Sync managed keys with operations server.
+
+adm-remops commit
+   Commit keys in local repository to Authorized_keys.
+
+adm-remops init <base_url>
+   Initialize and set base URL for operations server.
+
+User
+====
+adm-remop newkey <role>
+ Create a new RSA ssh key pair for <role>. Key store in current working dir.
+
+adm-remop req <role> <keyfile>
+ Create a request for authorization.
+
+Administrator
+=============
+adm-remop bless <user> <role>
+ Accept an authorization request.
+
+adm-remop init
+ Initialize repository and create the repository RSA key pair.
+
+Performing a remote operation
+=============================
+remop [-l<user>|-l <user>] [<role>@]<host> <command>
+
+Remote operation handler on the destination server
+==================================================
+remops <user> <role>
+ENV: SSH_ORIGINAL_COMMAND=<cmd> [arg]*
+
