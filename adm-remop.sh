@@ -24,6 +24,7 @@ if [ "$1" == init ]; then
 	echo "Cannot create $REMOPDIR/etc $REMOPDIR/keys $REMOPDIR/req"
 	exit 1
     fi
+    chmod 0733 $REMOPDIR/req
 
     [ -f $REMOPDIR/etc/key.pem ] || (umask 0077; openssl genrsa -out $REMOPDIR/etc/key.pem 4096)
     chmod 0400 $REMOPDIR/etc/key.pem
@@ -49,10 +50,11 @@ if [ "$1" == req ]; then
     [ -f "$KEY" ] || exit 1
     [ -f "$KEY.pub" ] || exit 1
     
-    mkdir -p $REMOPDIR/req/$USER/$ROLE || exit 1
-    cp -p $KEY $REMOPDIR/req/$USER/$ROLE/key || exit 1
-    chmod 0400 $REMOPDIR/req/$USER/$ROLE/key || exit 1
-    cp -p $KEY.pub $REMOPDIR/req/$USER/$ROLE/key.pub || exit 1
+    RND="$(head /dev/urandom | md5sum |cut -d ' ' -f 1)"
+
+    cp -p $KEY $REMOPDIR/req/req.$USER.$ROLE.priv.$RND || exit 1
+    chmod 0444 $REMOPDIR/req/req.$USER.$ROLE.priv.$RND || exit 1
+    cp -p $KEY.pub $REMOPDIR/req/req.$USER.$ROLE.pub.$RND || exit 1
     logger -i -p syslog.info "$USER:req:$ROLE:$KEY:"
     exit 0
 fi
@@ -65,10 +67,24 @@ if [ "$1" == bless ]; then
     [ -f $REMOPDIR/etc/key.pem ] || exit 2
     RUSER="$2"
     ROLE="$3"
-    [ -f $REMOPDIR/req/$RUSER/$ROLE/key ] || exit 1
-    [ -f $REMOPDIR/req/$RUSER/$ROLE/key.pub ] || exit 1
+
+    for f in $REMOPDIR/req/req.$USER.$ROLE.pub.* $REMOPDIR/req/req.$RUSER.$ROLE.priv.*; do
+	if [ ! -f "$f" ]; then
+	    echo "Cannot find request for $RUSER and $ROLE"
+	    exit 1
+	fi
+    done
+    PUBKEY="$REMOPDIR/req/req.$USER.$ROLE.pub.*"
+    PRIVKEY="$REMOPDIR/req/req.$USER.$ROLE.priv.*"
+
     mkdir -p $REMOPDIR/keys/$RUSER/$ROLE
-    cp $REMOPDIR/req/$RUSER/$ROLE/key $REMOPDIR/req/$RUSER/$ROLE/key.pub $REMOPDIR/keys/$RUSER/$ROLE
+    cp $PUBKEY $REMOPDIR/keys/$RUSER/$ROLE/key.pub
+    # FIXME how to protect this key now? user must be able to read it..
+    # 1. special suid binary just for this purpose. (check remop user. only work in a certain place, etc)
+    # 2. root cronjob that fixes permissions afterward.
+    cp $PRIVKEY $REMOPDIR/keys/$RUSER/$ROLE/key
+    chmod 0400 $REMOPDIR/keys/$RUSER/$ROLE/key
+    
     openssl dgst -sha512 -sign $REMOPDIR/etc/key.pem -out $REMOPDIR/keys/$RUSER/$ROLE/key.sig $REMOPDIR/keys/$RUSER/$ROLE/key
     openssl dgst -sha512 -sign $REMOPDIR/etc/key.pem -out $REMOPDIR/keys/$RUSER/$ROLE/key.pub.sig $REMOPDIR/keys/$RUSER/$ROLE/key.pub
     echo "$RUSER:$ROLE:" >> $REMOPDIR/keylist
