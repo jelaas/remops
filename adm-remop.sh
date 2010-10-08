@@ -17,7 +17,10 @@ REMOPUSER=REMOPUSER
 
 if [ "$1" == init ]; then
     [ "$USER" = "$REMOPUSER" ] || (echo "You are not the administrative remop user '$REMOPUSER'";exit 1)
-    mkdir -p $REMOPDIR/etc $REMOPDIR/keys $REMOPDIR/req
+    if ! mkdir -p $REMOPDIR/etc $REMOPDIR/keys $REMOPDIR/req; then
+	echo "Cannot create $REMOPDIR/etc $REMOPDIR/keys $REMOPDIR/req"
+	exit 1
+    fi
 
     [ -f $REMOPDIR/etc/key.pem ] || (umask 0077; openssl genrsa -out $REMOPDIR/etc/key.pem 4096)
     chmod 0400 $REMOPDIR/etc/key.pem
