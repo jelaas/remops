@@ -34,6 +34,7 @@ function add_manual {
     
     mkdir -p $HOME/remops/roles/$ROLE/manual_keys
     cp $KEYFILE $HOME/remops/roles/$ROLE/manual_keys/$RUSER
+    return 0
 }
 
 function add_managed {
@@ -61,6 +62,7 @@ function add_managed {
     mkdir -p $HOME/remops/roles/$ROLE/managed_keys
     cp $F $HOME/remops/roles/$ROLE/managed_keys/$RUSER
     rm -f $F $F.sig
+    return 0
 }
 
 function sync_new {
@@ -102,6 +104,7 @@ function sync_check {
 	    fi
 	done
     done
+    return 0
 }
 
 function sync_do {
@@ -117,6 +120,7 @@ function sync_now {
     [ -f $HOME/remops/etc/ops_base_url ] || exit 1
     
     sync_check|sync_do
+    return 0
 }
 
 function commit {
@@ -134,6 +138,7 @@ function commit {
 	cat $f >> $F
     done
     cp $F $HOME/.ssh/authorized_keys
+    return 0
 }
 
 [ "$1" = add -a "$2" = manual ] && shift 2 && add_manual "$@" && exit
