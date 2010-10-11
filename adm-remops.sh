@@ -96,7 +96,7 @@ function sync_check {
     for D in $HOME/remops/roles/*; do
 	[ -d "$D" ] || continue
 	for U in $D/managed_keys/*; do
-	    [ -f "$D" ] || continue
+	    [ -f "$U" ] || continue
 	    if ! grep "^$(basename $U):$(basename $D):" $F; then
 		echo "D $(basename $U):$(basename $D)"
 	    fi
