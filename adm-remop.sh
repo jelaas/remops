@@ -74,7 +74,7 @@ if [ "$1" == reqlist ]; then
     for f in $REMOPDIR/req/req.*; do
 	RUSER="$(echo $f|cut -d . -f 2)"
 	ROLE="$(echo $f|cut -d . -f 3)"
-	echo "$RUSER($(stat -c %U)) $ROLE $(stat -c %y $f)"
+	echo "$RUSER($(stat -c %U $f)) $ROLE $(stat -c %y $f)"
     done
     exit 0
 fi
