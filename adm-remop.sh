@@ -63,7 +63,7 @@ if [ "$1" == req ]; then
     fi
     [ -f "$KEY.pub" ] || exit 1
     
-    RND="$(head /dev/urandom | md5sum |cut -d ' ' -f 1)"
+    RND="$(head -c 32 /dev/urandom | md5sum |cut -d ' ' -f 1)"
 
     cp -p $KEY.pub $REMOPDIR/req/req.$USER.$ROLE.pub.$RND || exit 1
     logger -i -p syslog.info "$USER:req:$ROLE:$KEY:"
