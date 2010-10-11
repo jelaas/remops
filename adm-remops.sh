@@ -121,8 +121,11 @@ function sync_now {
 
 function commit {
     F=/tmp/akeys.$$
-    grep -v remops $HOME/.ssh/authorized_keys > $F
+    mkdir -p $HOME/.ssh
+    chmod 0700 $HOME/.ssh
+    grep -sv remops $HOME/.ssh/authorized_keys > $F
     for f in $HOME/remops/roles/*/managed_keys/* $HOME/remops/roles/*/manual_keys/*; do
+	[ -f "$f" ] || continue
 	U="$(basename $f)"
 	R="$(basename $U)"
 	R="$(basename $R)"
