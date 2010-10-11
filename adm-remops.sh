@@ -97,7 +97,7 @@ function sync_check {
 	[ -d "$D" ] || continue
 	for U in $D/managed_keys/*; do
 	    [ -f "$U" ] || continue
-	    if ! grep "^$(basename $U):$(basename $D):" $F; then
+	    if ! grep -q "^$(basename $U):$(basename $D):" $F; then
 		echo "D $(basename $U):$(basename $D)"
 	    fi
 	done
