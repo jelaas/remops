@@ -17,7 +17,8 @@
 #?V=`cat version.txt|cut -d ' ' -f 2`
 #?CC=./shpp.sh
 #?prgsh=remop.sh remops.sh adm-remop.sh adm-remops.sh
-#?prg=remop remops adm-remop adm-remops
+#?prgops=remop adm-remop
+#?prgdst=remops adm-remops
 #?export LIBEXECDIR
 #?export BINDIR
 #?export SYSCONFDIR
@@ -26,12 +27,16 @@
 #?export REMOPUSER
 #?%:	%.sh
 #?	VERSION=$(V) ./shpp.sh $<
-#?all:	$(prg)
-#?install:	$(prg)
+#?all:	$(prgops) $(prgdst)
+#?installops:	$(prgops)
 #?	mkdir -p $(DESTDIR)$(BINDIR)
-#?	cp -f $(prg) $(DESTDIR)$(BINDIR)
+#?	cp -f $(prgops) $(DESTDIR)$(BINDIR)
+#?installdst:	$(prgdst)
+#?	mkdir -p $(DESTDIR)$(BINDIR)
+#?	cp -f $(prgdst) $(DESTDIR)$(BINDIR)
+#?install:	installops installdst
 #?clean:
-#?	rm -f $(prg)
+#?	rm -f $(prgops) $(prgdst)
 #?tarball:	clean
 #?	make-tarball.sh
 PREFIX= /usr
@@ -46,7 +51,8 @@ MANDIR= $(PREFIX)/share/man
 V=`cat version.txt|cut -d ' ' -f 2`
 CC=./shpp.sh
 prgsh=remop.sh remops.sh adm-remop.sh adm-remops.sh
-prg=remop remops adm-remop adm-remops
+prgops=remop adm-remop
+prgdst=remops adm-remops
 export LIBEXECDIR
 export BINDIR
 export SYSCONFDIR
@@ -55,11 +61,15 @@ export REMOPDIR
 export REMOPUSER
 %:	%.sh
 	VERSION=$(V) ./shpp.sh $<
-all:	$(prg)
-install:	$(prg)
+all:	$(prgops) $(prgdst)
+installops:	$(prgops)
 	mkdir -p $(DESTDIR)$(BINDIR)
-	cp -f $(prg) $(DESTDIR)$(BINDIR)
+	cp -f $(prgops) $(DESTDIR)$(BINDIR)
+installdst:	$(prgdst)
+	mkdir -p $(DESTDIR)$(BINDIR)
+	cp -f $(prgdst) $(DESTDIR)$(BINDIR)
+install:	installops installdst
 clean:
-	rm -f $(prg)
+	rm -f $(prgops) $(prgdst)
 tarball:	clean
 	make-tarball.sh
