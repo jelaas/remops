@@ -145,6 +145,27 @@ if [ "$1" == bless ]; then
     exit 0
 fi
 
+if [ "$1" == curse ]; then
+    if [ "$USER" != "$REMOPUSER" ]; then
+	echo "You are not the administrative remop user '$REMOPUSER'"
+	exit 1
+    fi
+
+    RUSER="$2"
+    ROLE="$3"
+    F=/tmp/keylst.$$
+
+    rm -f $REMOPDIR/keys/$RUSER/$ROLE/key.pub $REMOPDIR/keys/$RUSER/$ROLE/key.pub.sig
+    
+    grep -v "^$RUSER:$ROLE:" $REMOPDIR/keylist > $F
+    cp $F $REMOPDIR/keylist
+    openssl dgst -sha512 -sign $REMOPDIR/etc/key.pem -out $REMOPDIR/keylist.sig $REMOPDIR/keylist
+
+    rm -f $F
+    logger -i -p syslog.info "$USER:curse:$RUSER:$ROLE:"
+    exit 0
+fi
+
 cat <<EOF
 User:
 =====
@@ -158,6 +179,9 @@ Administrator:
 ==============
 adm-remop bless <user> <role>
  Accept an authorization request.
+
+adm-remop curse <user> <role>
+ Remove authorization for role from user.
 
 adm-remop init
  Initialize repository and create the repository RSA key pair.
