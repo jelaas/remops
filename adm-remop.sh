@@ -34,21 +34,26 @@ if [ "$1" = init ]; then
 fi
 
 if [ "$1" = newkey ]; then
+    RUSER="$USER"
+    if [ "$2" = "-u" ]; then
+	RUSER="$3"
+	shift 2
+    fi
     ROLE="$2"
     if [ -z "$ROLE" ]; then
 	echo "Need ROLE as argument"
 	exit 2
     fi
     
-    if [ -f "$HOME/.remop/keys/$USER/$ROLE/key" ]; then
-	echo "Key $HOME/.remop/keys/$USER/$ROLE/key already exists!"
+    if [ -f "$HOME/.remop/keys/$RUSER/$ROLE/key" ]; then
+	echo "Key $HOME/.remop/keys/$RUSER/$ROLE/key already exists!"
 	exit 1
     fi
 
-    mkdir -p $HOME/.remop/keys/$USER/$ROLE
-    (umask 0077;ssh-keygen -b 2048 -t rsa -f $HOME/.remop/keys/$USER/$ROLE/key)
-    chmod 0444 $HOME/.remop/keys/$USER/$ROLE/key.pub
-    echo "Created key rsa_$ROLE"
+    mkdir -p $HOME/.remop/keys/$RUSER/$ROLE
+    (umask 0077;ssh-keygen -b 2048 -t rsa -f $HOME/.remop/keys/$RUSER/$ROLE/key)
+    chmod 0444 $HOME/.remop/keys/$RUSER/$ROLE/key.pub
+    echo "Created key for user $RUSER with role $ROLE"
     exit 0
 fi
 
@@ -181,7 +186,7 @@ fi
 cat <<EOF
 User:
 =====
-adm-remop newkey <role>
+adm-remop newkey [-u <user>] <role>
  Create a new RSA ssh key pair for <role>. Key store in current working dir.
 
 adm-remop req [-u <user>] <role> [keyfile]
