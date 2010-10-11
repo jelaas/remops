@@ -15,7 +15,7 @@
 REMOPDIR=REMOPDIR
 REMOPUSER=REMOPUSER
 
-if [ "$1" == init ]; then
+if [ "$1" = init ]; then
     if [ "$USER" != "$REMOPUSER" ]; then
 	echo "You are not the administrative remop user '$REMOPUSER'"
 	exit 1
@@ -33,7 +33,7 @@ if [ "$1" == init ]; then
     exit 0
 fi
 
-if [ "$1" == newkey ]; then
+if [ "$1" = newkey ]; then
     ROLE="$2"
     if [ -z "$ROLE" ]; then
 	echo "Need ROLE as argument"
@@ -52,11 +52,16 @@ if [ "$1" == newkey ]; then
     exit 0
 fi
 
-if [ "$1" == req ]; then
+if [ "$1" = req ]; then
+    RUSER="$USER"
+    if [ "$2" = "-u" ]; then
+	RUSER="$3"
+	shift 2
+    fi
     ROLE="$2"
     KEY="$3"
     if [ -z "$KEY" ]; then
-	KEY="$HOME/.remop/keys/$USER/$ROLE/key.pub"
+	KEY="$HOME/.remop/keys/$RUSER/$ROLE/key.pub"
 	if [ ! -f "$KEY" ]; then
 	    echo "You need to create a suitable key for $ROLE first."
 	    echo " $ adm-remop newkey $ROLE"
@@ -72,12 +77,12 @@ if [ "$1" == req ]; then
     
     RND="$(head -c 32 /dev/urandom | md5sum |cut -d ' ' -f 1)"
 
-    cp -p $KEY $REMOPDIR/req/req.$USER.$ROLE.pub.$RND || exit 1
-    logger -i -p syslog.info "$USER:req:$ROLE:$KEY:"
+    cp -p $KEY $REMOPDIR/req/req.$RUSER.$ROLE.pub.$RND || exit 1
+    logger -i -p syslog.info "$RUSER:req:$ROLE:$KEY:"
     exit 0
 fi
 
-if [ "$1" == reqlist ]; then
+if [ "$1" = reqlist ]; then
     for f in $REMOPDIR/req/req.*; do
 	RUSER="$(echo $f|cut -d . -f 2)"
 	ROLE="$(echo $f|cut -d . -f 3)"
@@ -86,7 +91,7 @@ if [ "$1" == reqlist ]; then
     exit 0
 fi
 
-if [ "$1" == list ]; then
+if [ "$1" = list ]; then
     for d in $REMOPDIR/keys/*; do
 	echo "User $(basename $d):"
 	for f in $d/*; do
@@ -96,7 +101,7 @@ if [ "$1" == list ]; then
     exit 0
 fi
 
-if [ "$1" == reject ]; then
+if [ "$1" = reject ]; then
     if [ "$USER" != "$REMOPUSER" ]; then
 	echo "You are not the administrative remop user '$REMOPUSER'"
 	exit 1
@@ -118,7 +123,7 @@ if [ "$1" == reject ]; then
     exit 0
 fi
 
-if [ "$1" == bless ]; then
+if [ "$1" = bless ]; then
     if [ "$USER" != "$REMOPUSER" ]; then
 	echo "You are not the administrative remop user '$REMOPUSER'"
 	exit 1
@@ -152,7 +157,7 @@ if [ "$1" == bless ]; then
     exit 0
 fi
 
-if [ "$1" == curse ]; then
+if [ "$1" = curse ]; then
     if [ "$USER" != "$REMOPUSER" ]; then
 	echo "You are not the administrative remop user '$REMOPUSER'"
 	exit 1
@@ -179,7 +184,7 @@ User:
 adm-remop newkey <role>
  Create a new RSA ssh key pair for <role>. Key store in current working dir.
 
-adm-remop req <role> [keyfile]
+adm-remop req [-u <user>] <role> [keyfile]
  Create a request for authorization.
 
 Administrator:
