@@ -47,6 +47,7 @@ if [ "$1" == newkey ]; then
 
     mkdir -p $HOME/.remop/keys/$USER/$ROLE
     (umask 0077;ssh-keygen -b 2048 -t rsa -f $HOME/.remop/keys/$USER/$ROLE/key)
+    chmod 0444 $HOME/.remop/keys/$USER/$ROLE/key
     echo "Created key rsa_$ROLE"
     exit 0
 fi
