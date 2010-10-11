@@ -11,12 +11,14 @@
 
 REMOPDIR=$HOME/.remop
 KEYS=$REMOPDIR/keys
+VERSION=VERSION
 
 RUSER=$USER
 
 if [ -z "$1" ]; then
     cat <<EOF
 remop [-l<user>|-l <user>] [<role>@]<host> <command>
+version: $VERSION
 EOF
     exit 0
 fi

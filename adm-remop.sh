@@ -14,6 +14,7 @@
 
 REMOPDIR=REMOPDIR
 REMOPUSER=REMOPUSER
+VERSION=VERSION
 
 if [ "$1" = init ]; then
     if [ "$USER" != "$REMOPUSER" ]; then
@@ -184,6 +185,9 @@ if [ "$1" = curse ]; then
 fi
 
 cat <<EOF
+adm-remop (newkey|req|bless|curse|init|reqlist|reject|list)
+version $VERSION
+
 User:
 =====
 adm-remop newkey [-u <user>] <role>

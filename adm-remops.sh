@@ -26,6 +26,7 @@
 #
 
 BINDIR=BINDIR
+VERSION=VERSION
 
 function add_manual {
     RUSER="$1"
@@ -178,6 +179,9 @@ if [ "$1" = init -a "$2" ]; then
 fi
 
 cat <<EOF
+adm-remops
+version $VERSION
+
 adm-remops add manual <user> <role> <keyfile>
    Add a manually managed key to server. 
 
