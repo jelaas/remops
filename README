@@ -43,21 +43,38 @@ adm-remops commit
 adm-remops init <base_url>
    Initialize and set base URL for operations server.
 
+adm-remops list
+   List roles and users.
+
 User
 ====
-adm-remop newkey <role>
+
+adm-remop newkey [-u <user>] <role>
  Create a new RSA ssh key pair for <role>. Key store in current working dir.
 
-adm-remop req <role> <keyfile>
+adm-remop req [-u <user>] <role> [keyfile]
  Create a request for authorization.
 
 Administrator
 =============
+
 adm-remop bless <user> <role>
  Accept an authorization request.
 
+adm-remop curse <user> <role>
+ Remove authorization for role from user.
+
 adm-remop init
  Initialize repository and create the repository RSA key pair.
+
+adm-remop reqlist
+ List pending request.
+
+adm-remop reject <user> <role>
+ Reject authorization request.
+
+adm-remop list
+ List all existing authorizations.
 
 Performing a remote operation
 =============================
