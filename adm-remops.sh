@@ -46,14 +46,14 @@ function add_managed {
     
     if [ ! -f $HOME/remops/etc/ops_public_key ]; then
 	URL=$BASEURL/etc/pubkey.pem
-	wget -O $HOME/remops/etc/ops_public_key $URL
+	wget -q -O $HOME/remops/etc/ops_public_key $URL
     fi
 
     F=/tmp/key.$RUSER.$ROLE.$$
 
     URL=$BASEURL/keys/$RUSER/$ROLE
-    wget -O $F $URL/key.pub
-    wget -O $F.sig $URL/key.pub.sig
+    wget -q -O $F $URL/key.pub
+    wget -q -O $F.sig $URL/key.pub.sig
     if ! openssl dgst -sha512 -verify $HOME/remops/etc/ops_public_key -signature $F.sig $F; then
 	echo "Signature check failed for $RUSER/$ROLE"
 	rm -f $F $F.sig
@@ -85,12 +85,12 @@ function sync_check {
 
     if [ ! -f $HOME/remops/etc/ops_public_key ]; then
 	URL=$BASEURL/etc/pubkey.pem
-	wget -O $HOME/remops/etc/ops_public_key $URL
+	wget -q -O $HOME/remops/etc/ops_public_key $URL
     fi
 
     F=/tmp/keylist.$$
 
-    wget -O $F $BASEURL/keylist
+    wget -q -O $F $BASEURL/keylist
 
     # Compare locally managed keys with central keylist
     cat $F|sync_new
@@ -111,8 +111,8 @@ function sync_do {
     while read CMD L; do
 	U=$(echo $L|cut -d : -f 1)
         R=$(echo $L|cut -d : -f 2)
-	[ "$CMD" = D ] && rm -f $HOME/remops/roles/$R/managed_keys/$U
-	[ "$CMD" = N ] && add_managed $U $R
+	[ "$CMD" = D ] && echo "Removing $U $R" && rm -f $HOME/remops/roles/$R/managed_keys/$U
+	[ "$CMD" = N ] && echo "Adding $U $R" && add_managed $U $R
     done
 }
 
@@ -120,6 +120,7 @@ function sync_now {
     [ -f $HOME/remops/etc/ops_base_url ] || exit 1
     
     sync_check|sync_do
+    echo "Do not forget to commit the changes!"
     return 0
 }
 
@@ -141,6 +142,18 @@ function commit {
     return 0
 }
 
+function do_list {
+    for f in $HOME/remops/roles/*/managed_keys/* $HOME/remops/roles/*/manual_keys/*; do
+        [ -f "$f" ] || continue
+        U="$(basename $f)"
+        R="$(dirname $f)"
+        R="$(dirname $R)"
+        R="$(basename $R)"
+	echo "$U $R"
+    done
+    return 0
+}
+
 [ "$1" = add -a "$2" = manual ] && shift 2 && add_manual "$@" && exit
 [ "$1" = add -a "$2" = managed ] && shift 2 && add_managed "$@" && exit
 
@@ -149,13 +162,15 @@ function commit {
 
 [ "$1" = commit ] && commit && exit
 
+[ "$1" = list ] && do_list && exit
+
 if [ "$1" = init -a "$2" ]; then
     URL="$2/etc/pubkey.pem"
-    if wget -O /dev/null $URL; then
+    if wget -q -O /dev/null $URL; then
 	mkdir -p $HOME/remops/etc
 	mkdir -p $HOME/remops/roles/public/cmd
 	echo "$2" > $HOME/remops/etc/ops_base_url
-	wget -O $HOME/remops/etc/ops_public_key $URL
+	wget -q -O $HOME/remops/etc/ops_public_key $URL
     fi
     exit
 fi
@@ -178,5 +193,8 @@ adm-remops commit
 
 adm-remops init <base_url>
    Initialize and set base URL for operations server.
+
+adm-remops list
+   List roles and users.
 
 EOF
