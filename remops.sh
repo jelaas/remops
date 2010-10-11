@@ -39,8 +39,8 @@ CMD="${SSH_ORIGINAL_COMMAND%% *}" # first word before space
 
 if [ "$CMD" = list ]; then
     logger -i -p syslog.info "builtin:$RUSER:$RROLE:$CMD:"
+    echo "public:list:list all available commands:"
     for d in $REMOPS/roles/*; do
-	echo "public:list:list all available commands:"
 	for f in $d/cmd/*; do
 	    [ -x "$f" ] || continue
 	    [ "$(basename $f)" = '*' ] && continue
