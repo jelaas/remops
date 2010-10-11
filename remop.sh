@@ -31,9 +31,11 @@ ROLE=public
 shift
 # Command is now $@
 
-if [ ! -d "$KEYS/$RUSER/$ROLE" ]; then
-   echo "You ($RUSER) do not possess role '$ROLE'."
-   exit 1
+if [ "$ROLE" != public ]; then
+    if [ ! -d "$KEYS/$RUSER/$ROLE" ]; then
+	echo "You ($RUSER) do not possess role '$ROLE'."
+	exit 1
+    fi
 fi
 
 logger -i -p syslog.info "$RUSER:$ROLE:$HOST:$@:"
