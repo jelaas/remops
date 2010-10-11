@@ -70,6 +70,47 @@ if [ "$1" == req ]; then
     exit 0
 fi
 
+if [ "$1" == reqlist ]; then
+    for f in $REMOPDIR/req/req.*; do
+	RUSER="$(echo $f|cut -d . -f 2)"
+	ROLE="$(echo $f|cut -d . -f 3)"
+	echo "$RUSER $ROLE $(stat -c %y $f)"
+    done
+    exit 0
+fi
+
+if [ "$1" == list ]; then
+    for d in $REMOPDIR/keys/*; do
+	echo "User $(basename $d):"
+	for f in $d/*; do
+	    echo " $(basename $f)"
+	done
+    done
+    exit 0
+fi
+
+if [ "$1" == reject ]; then
+    if [ "$USER" != "$REMOPUSER" ]; then
+	echo "You are not the administrative remop user '$REMOPUSER'"
+	exit 1
+    fi
+
+    RUSER="$2"
+    ROLE="$3"
+
+    for f in $REMOPDIR/req/req.$RUSER.$ROLE.pub.*; do
+	if [ ! -f "$f" ]; then
+	    echo "Cannot find request for $RUSER and $ROLE"
+	    exit 1
+	fi
+    done
+    PUBKEY="$REMOPDIR/req/req.$RUSER.$ROLE.pub.*"
+
+    rm -f $PUBKEY
+    logger -i -p syslog.info "$USER:reject:$RUSER:$ROLE:"
+    exit 0
+fi
+
 if [ "$1" == bless ]; then
     if [ "$USER" != "$REMOPUSER" ]; then
 	echo "You are not the administrative remop user '$REMOPUSER'"
@@ -120,6 +161,15 @@ adm-remop bless <user> <role>
 
 adm-remop init
  Initialize repository and create the repository RSA key pair.
+
+adm-remop reqlist
+ List pending request.
+
+adm-remop reject <user> <role>
+ Reject authorization request.
+
+adm-remop list
+ List all existing authorizations.
 
 EOF
 
