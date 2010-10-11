@@ -8,7 +8,7 @@
 #
 
 # adm-remop newkey <role>
-# adm-remop req <role> <keyfile>
+# adm-remop req <role>
 # adm-remop bless <user> <role>
 # adm-remop init
 
@@ -39,21 +39,31 @@ if [ "$1" == newkey ]; then
 	echo "Need ROLE as argument"
 	exit 2
     fi
-    (umask 0077;ssh-keygen -b 2048 -t rsa -f rsa_$ROLE)
+    
+    if [ -f "$HOME/.remop/keys/$USER/$ROLE/key" ]; then
+	echo "Key $HOME/.remop/keys/$USER/$ROLE/key already exists!"
+	exit 1
+    fi
+
+    mkdir -p $HOME/.remop/keys/$USER/$ROLE
+    (umask 0077;ssh-keygen -b 2048 -t rsa -f $HOME/.remop/keys/$USER/$ROLE/key)
     echo "Created key rsa_$ROLE"
     exit 0
 fi
 
 if [ "$1" == req ]; then
     ROLE="$2"
-    KEY="$3"
-    [ -f "$KEY" ] || exit 1
+    KEY="$HOME/.remop/keys/$USER/$ROLE/key"
+    if [ ! -f "$KEY" ]; then
+	echo "You need to create a suitable key for $ROLE first."
+	echo " $ adm-remop newkey $ROLE"
+	echo "($KEY does not exist)."
+	exit 1
+    fi
     [ -f "$KEY.pub" ] || exit 1
     
     RND="$(head /dev/urandom | md5sum |cut -d ' ' -f 1)"
 
-    cp -p $KEY $REMOPDIR/req/req.$USER.$ROLE.priv.$RND || exit 1
-    chmod 0444 $REMOPDIR/req/req.$USER.$ROLE.priv.$RND || exit 1
     cp -p $KEY.pub $REMOPDIR/req/req.$USER.$ROLE.pub.$RND || exit 1
     logger -i -p syslog.info "$USER:req:$ROLE:$KEY:"
     exit 0
@@ -68,29 +78,27 @@ if [ "$1" == bless ]; then
     RUSER="$2"
     ROLE="$3"
 
-    for f in $REMOPDIR/req/req.$RUSER.$ROLE.pub.* $REMOPDIR/req/req.$RUSER.$ROLE.priv.*; do
+    for f in $REMOPDIR/req/req.$RUSER.$ROLE.pub.*; do
 	if [ ! -f "$f" ]; then
 	    echo "Cannot find request for $RUSER and $ROLE"
 	    exit 1
 	fi
     done
     PUBKEY="$REMOPDIR/req/req.$RUSER.$ROLE.pub.*"
-    PRIVKEY="$REMOPDIR/req/req.$RUSER.$ROLE.priv.*"
 
     # FIXME: check that owner is same as $RUSER in filename
 
     mkdir -p $REMOPDIR/keys/$RUSER/$ROLE
-    cp $PUBKEY $REMOPDIR/keys/$RUSER/$ROLE/key.pub
-    # FIXME how to protect this key now? user must be able to read it..
-    # 1. special suid binary just for this purpose. (check remop user. only work in a certain place, etc)
-    # 2. root cronjob that fixes permissions afterward.
-    cp $PRIVKEY $REMOPDIR/keys/$RUSER/$ROLE/key
-    chmod 0400 $REMOPDIR/keys/$RUSER/$ROLE/key
+    if ! cp $PUBKEY $REMOPDIR/keys/$RUSER/$ROLE/key.pub; then
+	echo "Failed to copy $PUBKEY"
+	exit 1
+    fi
     
-    openssl dgst -sha512 -sign $REMOPDIR/etc/key.pem -out $REMOPDIR/keys/$RUSER/$ROLE/key.sig $REMOPDIR/keys/$RUSER/$ROLE/key
     openssl dgst -sha512 -sign $REMOPDIR/etc/key.pem -out $REMOPDIR/keys/$RUSER/$ROLE/key.pub.sig $REMOPDIR/keys/$RUSER/$ROLE/key.pub
     echo "$RUSER:$ROLE:" >> $REMOPDIR/keylist
     openssl dgst -sha512 -sign $REMOPDIR/etc/key.pem -out $REMOPDIR/keylist.sig $REMOPDIR/keylist
+
+    rm -f $PUBKEY
     logger -i -p syslog.info "$USER:bless:$RUSER:$ROLE:"
     exit 0
 fi
@@ -101,7 +109,7 @@ User:
 adm-remop newkey <role>
  Create a new RSA ssh key pair for <role>. Key store in current working dir.
 
-adm-remop req <role> <keyfile>
+adm-remop req <role>
  Create a request for authorization.
 
 Administrator:

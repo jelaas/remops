@@ -9,7 +9,7 @@
 
 # remop [-l<user>|-l <user>] [<role>@]<host> <command>
 
-REMOPDIR=REMOPDIR
+REMOPDIR=$HOME/.remop
 KEYS=$REMOPDIR/keys
 
 RUSER=$USER
