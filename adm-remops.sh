@@ -33,6 +33,7 @@ function add_manual {
     KEYFILE="$3"
     
     mkdir -p $HOME/remops/roles/$ROLE/manual_keys
+    mkdir -p $HOME/remops/roles/$ROLE/cmd
     cp $KEYFILE $HOME/remops/roles/$ROLE/manual_keys/$RUSER
     return 0
 }
@@ -60,6 +61,7 @@ function add_managed {
 	return 1
     fi
     mkdir -p $HOME/remops/roles/$ROLE/managed_keys
+    mkdir -p $HOME/remops/roles/$ROLE/cmd
     cp $F $HOME/remops/roles/$ROLE/managed_keys/$RUSER
     rm -f $F $F.sig
     return 0
