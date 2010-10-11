@@ -54,18 +54,25 @@ fi
 
 if [ "$1" == req ]; then
     ROLE="$2"
-    KEY="$HOME/.remop/keys/$USER/$ROLE/key"
+    KEY="$3"
+    if [ -z "$KEY" ]; then
+	KEY="$HOME/.remop/keys/$USER/$ROLE/key.pub"
+	if [ ! -f "$KEY" ]; then
+	    echo "You need to create a suitable key for $ROLE first."
+	    echo " $ adm-remop newkey $ROLE"
+	    echo "($KEY does not exist)."
+	    exit 1
+	fi
+    fi
     if [ ! -f "$KEY" ]; then
-	echo "You need to create a suitable key for $ROLE first."
-	echo " $ adm-remop newkey $ROLE"
+	echo "You need need a suitable key for $ROLE."
 	echo "($KEY does not exist)."
 	exit 1
     fi
-    [ -f "$KEY.pub" ] || exit 1
     
     RND="$(head -c 32 /dev/urandom | md5sum |cut -d ' ' -f 1)"
 
-    cp -p $KEY.pub $REMOPDIR/req/req.$USER.$ROLE.pub.$RND || exit 1
+    cp -p $KEY $REMOPDIR/req/req.$USER.$ROLE.pub.$RND || exit 1
     logger -i -p syslog.info "$USER:req:$ROLE:$KEY:"
     exit 0
 fi
@@ -172,7 +179,7 @@ User:
 adm-remop newkey <role>
  Create a new RSA ssh key pair for <role>. Key store in current working dir.
 
-adm-remop req <role>
+adm-remop req <role> [keyfile]
  Create a request for authorization.
 
 Administrator:
