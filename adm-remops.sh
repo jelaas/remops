@@ -50,11 +50,11 @@ function add_managed {
 
     F=/tmp/key.$RUSER.$ROLE.$$
 
-    URL=$BASEURL/keys/$USER/$ROLE
+    URL=$BASEURL/keys/$RUSER/$ROLE
     wget -O $F $URL/key.pub
     wget -O $F.sig $URL/key.pub.sig
     if ! openssl dgst -sha512 -verify $HOME/remops/etc/ops_public_key -signature $F.sig $F; then
-	echo "Signature check failed for $USER/$ROLE"
+	echo "Signature check failed for $RUSER/$ROLE"
 	rm -f $F $F.sig
 	return 1
     fi
