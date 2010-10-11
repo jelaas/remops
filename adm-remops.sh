@@ -127,7 +127,8 @@ function commit {
     for f in $HOME/remops/roles/*/managed_keys/* $HOME/remops/roles/*/manual_keys/*; do
 	[ -f "$f" ] || continue
 	U="$(basename $f)"
-	R="$(basename $U)"
+	R="$(dirname $f)"
+	R="$(dirname $R)"
 	R="$(basename $R)"
 	echo -n "command=\"$BINDIR/remops $U $R\",no-port-forwarding " >> $F
 	cat $f >> $F
