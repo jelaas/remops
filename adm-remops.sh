@@ -94,7 +94,9 @@ function sync_check {
     cat $F|sync_new
 
     for D in $HOME/remops/roles/*; do
+	[ -d "$D" ] || continue
 	for U in $D/managed_keys/*; do
+	    [ -f "$D" ] || continue
 	    if ! grep "^$(basename $U):$(basename $D):" $F; then
 		echo "D $(basename $U):$(basename $D)"
 	    fi
@@ -141,6 +143,8 @@ function commit {
 if [ "$1" = init -a "$2" ]; then
     URL="$2/etc/pubkey.pem"
     if wget -O /dev/null $URL; then
+	mkdir -p $HOME/remops/etc
+	mkdir -p $HOME/remops/roles/public/cmd
 	echo "$2" > $HOME/remops/etc/ops_base_url
 	wget -O $HOME/remops/etc/ops_public_key $URL
     fi
