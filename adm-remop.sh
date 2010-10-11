@@ -68,14 +68,16 @@ if [ "$1" == bless ]; then
     RUSER="$2"
     ROLE="$3"
 
-    for f in $REMOPDIR/req/req.$USER.$ROLE.pub.* $REMOPDIR/req/req.$RUSER.$ROLE.priv.*; do
+    for f in $REMOPDIR/req/req.$RUSER.$ROLE.pub.* $REMOPDIR/req/req.$RUSER.$ROLE.priv.*; do
 	if [ ! -f "$f" ]; then
 	    echo "Cannot find request for $RUSER and $ROLE"
 	    exit 1
 	fi
     done
-    PUBKEY="$REMOPDIR/req/req.$USER.$ROLE.pub.*"
-    PRIVKEY="$REMOPDIR/req/req.$USER.$ROLE.priv.*"
+    PUBKEY="$REMOPDIR/req/req.$RUSER.$ROLE.pub.*"
+    PRIVKEY="$REMOPDIR/req/req.$RUSER.$ROLE.priv.*"
+
+    # FIXME: check that owner is same as $RUSER in filename
 
     mkdir -p $REMOPDIR/keys/$RUSER/$ROLE
     cp $PUBKEY $REMOPDIR/keys/$RUSER/$ROLE/key.pub
