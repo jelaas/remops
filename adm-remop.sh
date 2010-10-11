@@ -191,7 +191,7 @@ version $VERSION
 User:
 =====
 adm-remop newkey [-u <user>] <role>
- Create a new RSA ssh key pair for <role>. Key store in current working dir.
+ Create a new RSA ssh key pair for <role>. Key stored in '\$HOME/.remop'.
 
 adm-remop req [-u <user>] <role> [keyfile]
  Create a request for authorization.
