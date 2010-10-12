@@ -12,6 +12,8 @@
 # $HOME/remops/roles/public/cmd/*|list
 # $HOME/remops/roles/<role>/cmd/*
 
+VERSION=VERSION
+
 if [ -z "$HOME" ]; then
     logger -i -p syslog.info "ERR=NOHOME:$RUSER:$RROLE:$CMD:"
     exit 2 # HOME needs to be set
@@ -60,8 +62,11 @@ if [ ! -d "$REMOPS/roles/$RROLE" ]; then
 fi
 
 if [ ! -f "$REMOPS/roles/$RROLE/cmd/$CMD" ]; then
-    logger -i -p syslog.info "ERR=NOCMD:$RUSER:$RROLE:$CMD:"
-    exit 2
+    if [ ! -f "$REMOPS/roles/public/cmd/$CMD" ]; then
+	logger -i -p syslog.info "ERR=NOCMD:$RUSER:$RROLE:$CMD:"
+	exit 2
+    fi
+    RROLE=public
 fi
 CMDARG="${SSH_ORIGINAL_COMMAND#* }"
 logger -i -p syslog.info "exec:$RUSER:$RROLE:$CMD:$CMDARG:"
