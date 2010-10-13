@@ -93,7 +93,20 @@ function sync_check {
 
     F=/tmp/keylist.$$
 
-    wget -q -O $F $BASEURL/keylist
+    if ! wget -q -O $F $BASEURL/keylist; then
+	echo "Failed to fetch: $BASEURL/keylist" >&2
+	exit 1
+    fi
+    if ! wget -q -O $F.sig $BASEURL/keylist.sig; then
+	echo "Failed to fetch: $BASEURL/keylist.sig" >&2
+	exit 1
+    fi
+
+    if ! openssl dgst -sha512 -verify $HOME/remops/etc/ops_public_key -signature $F.sig $F; then
+	echo "Signature check failed for keylist" >&2
+	rm -f $F $F.sig
+	exit 1
+    fi
 
     # Compare locally managed keys with central keylist
     cat $F|sync_new
