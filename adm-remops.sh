@@ -56,7 +56,7 @@ function add_managed {
     URL=$BASEURL/keys/$RUSER/$ROLE
     wget -q -O $F $URL/key.pub
     wget -q -O $F.sig $URL/key.pub.sig
-    if ! openssl dgst -sha512 -verify $HOME/remops/etc/ops_public_key -signature $F.sig $F; then
+    if ! openssl dgst -sha512 -verify $HOME/remops/etc/ops_public_key -signature $F.sig $F >/dev/null; then
 	echo "Signature check failed for $RUSER/$ROLE"
 	rm -f $F $F.sig
 	return 1
@@ -102,7 +102,7 @@ function sync_check {
 	exit 1
     fi
 
-    if ! openssl dgst -sha512 -verify $HOME/remops/etc/ops_public_key -signature $F.sig $F; then
+    if ! openssl dgst -sha512 -verify $HOME/remops/etc/ops_public_key -signature $F.sig $F >/dev/null; then
 	echo "Signature check failed for keylist" >&2
 	rm -f $F $F.sig
 	exit 1
