@@ -25,7 +25,7 @@
 #?export LOCALSTATEDIR
 #?export REMOPDIR
 #?export REMOPUSER
-#?%:	%.sh
+#?%:	%.sh Makefile
 #?	VERSION=$(V) ./shpp.sh $<
 #?all:	$(prgops) $(prgdst)
 #?installops:	$(prgops)
@@ -59,7 +59,7 @@ export SYSCONFDIR
 export LOCALSTATEDIR
 export REMOPDIR
 export REMOPUSER
-%:	%.sh
+%:	%.sh Makefile
 	VERSION=$(V) ./shpp.sh $<
 all:	$(prgops) $(prgdst)
 installops:	$(prgops)
