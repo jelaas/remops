@@ -15,7 +15,7 @@
 VERSION=VERSION
 
 if [ -z "$HOME" ]; then
-    logger -i -p syslog.info "ERR=NOHOME:$RUSER:$RROLE:$CMD:"
+    logger -i -t remops -p syslog.info ":ERR=NOHOME:U=$RUSER:R=$RROLE:C=$CMD:"
     exit 2 # HOME needs to be set
 fi
 
@@ -40,7 +40,7 @@ RROLE="$2"
 CMD="${SSH_ORIGINAL_COMMAND%% *}" # first word before space
 
 if [ "$CMD" = list ]; then
-    logger -i -p syslog.info "builtin:$RUSER:$RROLE:$CMD:"
+    logger -i -t remops -p syslog.info ":A=builtin:U=$RUSER:R=$RROLE:C=$CMD:"
     echo "public:list:list all available commands:"
     for d in $REMOPS/roles/*; do
 	for f in $d/cmd/*; do
@@ -58,17 +58,17 @@ if [ "$CMD" = list ]; then
 fi
 
 if [ ! -d "$REMOPS/roles/$RROLE" ]; then
-    logger -i -p syslog.info "ERR=NOROLE:$RUSER:$RROLE:$CMD:"
+    logger -i -t remops -p syslog.info ":ERR=NOROLE:U=$RUSER:R=$RROLE:C=$CMD:"
 fi
 
 if [ ! -f "$REMOPS/roles/$RROLE/cmd/$CMD" ]; then
     if [ ! -f "$REMOPS/roles/public/cmd/$CMD" ]; then
-	logger -i -p syslog.info "ERR=NOCMD:$RUSER:$RROLE:$CMD:"
+	logger -i -t remops -p syslog.info ":ERR=NOCMD:U=$RUSER:R=$RROLE:C=$CMD:"
 	exit 2
     fi
     RROLE=public
 fi
 CMDARG="${SSH_ORIGINAL_COMMAND#* }"
-logger -i -p syslog.info "exec:$RUSER:$RROLE:$CMD:$CMDARG:"
+logger -i -t remops -p syslog.info ":A=exec:U=$RUSER:R=$RROLE:C=$CMD:ARGS=$CMDARG:"
 
 $REMOPS/roles/$RROLE/cmd/$CMD $CMDARG

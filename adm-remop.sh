@@ -30,7 +30,7 @@ if [ "$1" = init ]; then
     [ -f $REMOPDIR/etc/key.pem ] || (umask 0077; openssl genrsa -out $REMOPDIR/etc/key.pem 4096)
     chmod 0400 $REMOPDIR/etc/key.pem
     openssl rsa -in $REMOPDIR/etc/key.pem -pubout -out $REMOPDIR/etc/pubkey.pem
-    logger -i -p syslog.info "$USER:init:"
+    logger -i -t adm-remop -p syslog.info ":A=init:U=$USER:"
     exit 0
 fi
 
@@ -84,7 +84,7 @@ if [ "$1" = req ]; then
     RND="$(head -c 32 /dev/urandom | md5sum |cut -d ' ' -f 1)"
 
     cp -p $KEY $REMOPDIR/req/req.$RUSER.$ROLE.pub.$RND || exit 1
-    logger -i -p syslog.info "$RUSER:req:$ROLE:$KEY:"
+    logger -i -t adm-remop -p syslog.info ":A=req:U=$RUSER:R=$ROLE:KEY=$KEY:"
     exit 0
 fi
 
@@ -125,7 +125,7 @@ if [ "$1" = reject ]; then
     PUBKEY="$REMOPDIR/req/req.$RUSER.$ROLE.pub.*"
 
     rm -f $PUBKEY
-    logger -i -p syslog.info "$USER:reject:$RUSER:$ROLE:"
+    logger -i -t adm-remop -p syslog.info ":A=reject:U=$USER:SU=$RUSER:R=$ROLE:"
     exit 0
 fi
 
@@ -159,7 +159,7 @@ if [ "$1" = bless ]; then
     openssl dgst -sha512 -sign $REMOPDIR/etc/key.pem -out $REMOPDIR/keylist.sig $REMOPDIR/keylist
 
     rm -f $PUBKEY
-    logger -i -p syslog.info "$USER:bless:$RUSER:$ROLE:"
+    logger -i -t adm-remop -p syslog.info ":A=bless:U=$USER:RU=$RUSER:R=$ROLE:"
     exit 0
 fi
 
@@ -180,7 +180,7 @@ if [ "$1" = curse ]; then
     openssl dgst -sha512 -sign $REMOPDIR/etc/key.pem -out $REMOPDIR/keylist.sig $REMOPDIR/keylist
 
     rm -f $F
-    logger -i -p syslog.info "$USER:curse:$RUSER:$ROLE:"
+    logger -i -t adm-remop -p syslog.info ":A=curse:U=$USER:RU=$RUSER:R=$ROLE:"
     exit 0
 fi
 

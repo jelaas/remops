@@ -44,6 +44,6 @@ fi
 SSHOPTIONS="$(ssh -i $KEYS/$RUSER/$ROLE/key remops@$HOST "$1-options")"
 [ $? = 0 ] || SSHOPTIONS=""
 
-logger -i -p syslog.info "$RUSER:$ROLE:$HOST:$SSHOPTIONS:$@:"
+logger -i -t remop -p syslog.info ":A=remop:U=$RUSER:R=$ROLE:H=$HOST:OPTS=$SSHOPTIONS:C=$@:"
 
-ssh -i $KEYS/$RUSER/$ROLE/key remops@$HOST "$@"
+ssh -i $KEYS/$RUSER/$ROLE/key $SSHOPTIONS remops@$HOST "$@"
