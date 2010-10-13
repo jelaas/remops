@@ -40,6 +40,10 @@ if [ "$ROLE" != public ]; then
     fi
 fi
 
-logger -i -p syslog.info "$RUSER:$ROLE:$HOST:$@:"
+
+SSHOPTIONS="$(ssh -i $KEYS/$RUSER/$ROLE/key remops@$HOST "$1-options")"
+[ $? = 0 ] || SSHOPTIONS=""
+
+logger -i -p syslog.info "$RUSER:$ROLE:$HOST:$SSHOPTIONS:$@:"
 
 ssh -i $KEYS/$RUSER/$ROLE/key remops@$HOST "$@"
