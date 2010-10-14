@@ -41,7 +41,7 @@ if [ "$ROLE" != public ]; then
 fi
 
 
-SSHOPTIONS="$(ssh -i $KEYS/$RUSER/$ROLE/key remops@$HOST "$1-options")"
+SSHOPTIONS="$(ssh -i $KEYS/$RUSER/$ROLE/key remops@$HOST "$1-options" < /dev/null)"
 [ $? = 0 ] || SSHOPTIONS=""
 
 logger -i -t remop -p syslog.info ":A=remop:U=$RUSER:R=$ROLE:H=$HOST:OPTS=$SSHOPTIONS:C=$@:"
