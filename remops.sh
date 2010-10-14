@@ -68,7 +68,7 @@ if [ ! -f "$REMOPS/roles/$RROLE/cmd/$CMD" ]; then
     fi
     RROLE=public
 fi
-CMDARG="${SSH_ORIGINAL_COMMAND#* }"
+CMDARG="${SSH_ORIGINAL_COMMAND:${#CMD}}"
 logger -i -t remops -p syslog.info ":A=exec:U=$RUSER:R=$RROLE:C=$CMD:ARGS=$CMDARG:"
 
 $REMOPS/roles/$RROLE/cmd/$CMD $CMDARG
