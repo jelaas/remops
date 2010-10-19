@@ -40,6 +40,11 @@ if [ "$ROLE" != public ]; then
     fi
 fi
 
+# ssh-agent stuff
+if [ -z "SSH_AGENT_PID" ]; then
+    eval $(ssh-agent)
+fi
+ssh-add $KEYS/$RUSER/$ROLE/key
 
 SSHOPTIONS="$(ssh -i $KEYS/$RUSER/$ROLE/key remops@$HOST "$1-options" < /dev/null)"
 [ $? = 0 ] || SSHOPTIONS=""
