@@ -34,11 +34,9 @@ ROLE=public
 shift
 # Command is now $@
 
-if [ "$ROLE" != public ]; then
-    if [ ! -d "$KEYS/$RUSER/$ROLE" ]; then
-	echo "You ($RUSER) do not possess role '$ROLE'."
-	exit 1
-    fi
+if [ ! -d "$KEYS/$RUSER/$ROLE" ]; then
+    echo "You ($RUSER) do not possess role '$ROLE'."
+    exit 1
 fi
 
 # ssh-agent stuff. Note that the agent needs to be removed from this script, since it is not
@@ -57,4 +55,6 @@ SSHOPTIONS="$(ssh -i $KEYS/$RUSER/$ROLE/key remops@$HOST "$1-options" < /dev/nul
 logger -i -t remop -p syslog.info ":A=remop:U=$RUSER:R=$ROLE:H=$HOST:OPTS=$SSHOPTIONS:C=$@:"
 
 ssh -i $KEYS/$RUSER/$ROLE/key $SSHOPTIONS remops@$HOST "$@"
+rc=$?
 [ "$AGENTSTARTED" = y ] && ssh-agent -k &> /dev/null
+exit $rc
