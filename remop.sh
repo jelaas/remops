@@ -41,7 +41,7 @@ if [ "$ROLE" != public ]; then
 fi
 
 # ssh-agent stuff
-if [ -z "SSH_AGENT_PID" ]; then
+if [ -z "$SSH_AGENT_PID" ]; then
     eval $(ssh-agent)
 fi
 ssh-add $KEYS/$RUSER/$ROLE/key
