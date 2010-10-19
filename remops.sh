@@ -64,6 +64,7 @@ fi
 if [ ! -f "$REMOPS/roles/$RROLE/cmd/$CMD" ]; then
     if [ ! -f "$REMOPS/roles/public/cmd/$CMD" ]; then
 	logger -i -t remops -p syslog.info ":ERR=NOCMD:U=$RUSER:R=$RROLE:C=$CMD:"
+	echo "Invalid command '$CMD'" >&2
 	exit 2
     fi
     RROLE=public
