@@ -62,9 +62,12 @@ if [ ! -d "$REMOPS/roles/$RROLE" ]; then
 fi
 
 if [ ! -f "$REMOPS/roles/$RROLE/cmd/$CMD" ]; then
+    # FIXME: do not report commands that end with "-options"
     if [ ! -f "$REMOPS/roles/public/cmd/$CMD" ]; then
-	logger -i -t remops -p syslog.info ":ERR=NOCMD:U=$RUSER:R=$RROLE:C=$CMD:"
-	echo "Invalid command '$CMD'" >&2
+	if [ "${CMD: -8}" != '-options' ]; then
+	    logger -i -t remops -p syslog.info ":ERR=NOCMD:U=$RUSER:R=$RROLE:C=$CMD:"
+	    echo "Invalid command '$CMD'" >&2
+	fi
 	exit 2
     fi
     RROLE=public
