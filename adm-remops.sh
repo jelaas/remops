@@ -28,6 +28,14 @@
 BINDIR=BINDIR
 VERSION=VERSION
 
+function verifykey {
+    local F A B
+    F="$1"
+    A=$(wc -l "$F"|(read A B; echo $A))    
+    [ "$A" = 1 ] && return 0
+    return 1
+}
+
 function add_manual {
     RUSER="$1"
     ROLE="$2"
@@ -35,6 +43,10 @@ function add_manual {
     
     mkdir -p $HOME/remops/roles/$ROLE/manual_keys
     mkdir -p $HOME/remops/roles/$ROLE/cmd
+    if ! verifykey $KEYFILE; then
+	echo "$KEYFILE does not look lika a proper one-line public key!"
+	return 1
+    fi
     cp $KEYFILE $HOME/remops/roles/$ROLE/manual_keys/$RUSER
     return 0
 }
@@ -59,6 +71,11 @@ function add_managed {
     if ! openssl dgst -sha512 -verify $HOME/remops/etc/ops_public_key -signature $F.sig $F >/dev/null; then
 	echo "Signature check failed for $RUSER/$ROLE"
 	rm -f $F $F.sig
+	return 1
+    fi
+    if ! verifykey $F; then
+	echo "$F does not look lika a proper one-line public key!"
+	rm -f $F.sig
 	return 1
     fi
     mkdir -p $HOME/remops/roles/$ROLE/managed_keys

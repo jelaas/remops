@@ -16,6 +16,14 @@ REMOPDIR=REMOPDIR
 REMOPUSER=REMOPUSER
 VERSION=VERSION
 
+function verifykey {
+    local F A B
+    F="$1"
+    A=$(wc -l "$F"|(read A B; echo $A))    
+    [ "$A" = 1 ] && return 0
+    return 1
+}
+
 if [ "$1" = init ]; then
     if [ "$USER" != "$REMOPUSER" ]; then
 	echo "You are not the administrative remop user '$REMOPUSER'"
@@ -82,8 +90,13 @@ if [ "$1" = req ]; then
     fi
     
     RND="$(head -c 32 /dev/urandom | md5sum |cut -d ' ' -f 1)"
-
-    cp -p $KEY $REMOPDIR/req/req.$RUSER.$ROLE.pub.$RND || exit 1
+    
+    if ! verifykey "$KEY"; then
+	echo "$KEY does not look lika a proper one-line public key!"
+	exit 1
+    fi
+    
+    cp -p "$KEY" $REMOPDIR/req/req.$RUSER.$ROLE.pub.$RND || exit 1
     logger -i -t adm-remop -p syslog.info ":A=req:U=$RUSER:R=$ROLE:KEY=$KEY:"
     exit 0
 fi
