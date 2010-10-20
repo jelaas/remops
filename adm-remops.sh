@@ -31,8 +31,15 @@ VERSION=VERSION
 function verifykey {
     local F A B
     F="$1"
+    
+    # file must contain only one line
     A=$(wc -l "$F"|(read A B; echo $A))    
-    [ "$A" = 1 ] && return 0
+    [ "$A" != 1 ] && return 1
+    
+    # must begin with: 'ssh-dss' or 'ssh-rsa'
+    read A B < $F
+    [ "$A" = ssh-dss ] && return 0
+    [ "$A" = ssh-rsa ] && return 0
     return 1
 }
 
