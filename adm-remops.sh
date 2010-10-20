@@ -120,6 +120,7 @@ function sync_check {
 	    fi
 	done
     done
+    rm -f $F $F.sig
     return 0
 }
 
@@ -155,6 +156,7 @@ function commit {
 	cat $f >> $F
     done
     cp $F $HOME/.ssh/authorized_keys
+    rm -f $F
     return 0
 }
 
