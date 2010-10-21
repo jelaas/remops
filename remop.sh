@@ -16,6 +16,8 @@ AGENTSTARTED=n
 
 RUSER=$USER
 
+DEFAULTROLE=${REMOPROLE:-public}
+
 if [ -z "$1" ]; then
     cat <<EOF
 remop [-l<user>|-l <user>] [<role>@]<host> <command>
@@ -28,7 +30,7 @@ fi
 [ "${1:0:2}" = "-l" ] && RUSER="${1:2}" && shift
 
 HOST=${1#*@}
-ROLE=public
+ROLE=$DEFAULTROLE
 [ "${1/%*@*/}" ] || ROLE=${1%%@*}
 
 shift
