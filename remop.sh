@@ -22,6 +22,9 @@ if [ -z "$1" ]; then
     cat <<EOF
 remop [-l<user>|-l <user>] [<role>@]<host> <command>
 version: $VERSION
+
+If ENV[REMOPROLE] is set this used as a default role, when role is not
+ specified, otherwise the default role is 'public'.
 EOF
     exit 0
 fi
