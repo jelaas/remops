@@ -43,6 +43,7 @@ if [ "$1" = init ]; then
     chmod 0733 $REMOPDIR/req
 
     [ -f $REMOPDIR/etc/key.pem ] || (umask 0077; openssl genrsa -out $REMOPDIR/etc/key.pem 4096)
+    [ -f $REMOPDIR/state/keylist.serial ] || (mkdir -p $REMOPDIR/state; echo 1 > $REMOPDIR/state/keylist.serial)
     chmod 0400 $REMOPDIR/etc/key.pem
     openssl rsa -in $REMOPDIR/etc/key.pem -pubout -out $REMOPDIR/etc/pubkey.pem
     logger -i -t adm-remop -p syslog.info ":A=init:U=$USER:"
@@ -132,7 +133,8 @@ if [ "$1" = reject ]; then
 	echo "You are not the administrative remop user '$REMOPUSER'"
 	exit 1
     fi
-
+    [ -d $REMOPDIR/state ] || mkdir -p $REMOPDIR/state
+    
     RUSER="$2"
     ROLE="$3"
 
@@ -155,6 +157,7 @@ if [ "$1" = bless ]; then
 	exit 1
     fi
     [ -f $REMOPDIR/etc/key.pem ] || exit 2
+    [ -d $REMOPDIR/state ] || mkdir -p $REMOPDIR/state
     RUSER="$2"
     ROLE="$3"
 
@@ -175,9 +178,13 @@ if [ "$1" = bless ]; then
     fi
     
     openssl dgst -sha512 -sign $REMOPDIR/etc/key.pem -out $REMOPDIR/keys/$RUSER/$ROLE/key.pub.sig $REMOPDIR/keys/$RUSER/$ROLE/key.pub
-    echo "$RUSER:$ROLE:" >> $REMOPDIR/keylist
+    read SERIAL < $REMOPDIR/state/keylist.serial
+    SERIAL=${SERIAL:-1}
+    SERIAL=$[ SERIAL + 1 ]
+    echo $SERIAL > $REMOPDIR/state/keylist.serial
+    echo "$RUSER:$ROLE:$SERIAL" >> $REMOPDIR/keylist
     openssl dgst -sha512 -sign $REMOPDIR/etc/key.pem -out $REMOPDIR/keylist.sig $REMOPDIR/keylist
-
+    
     rm -f $PUBKEY
     logger -i -t adm-remop -p syslog.info ":A=bless:U=$USER:RU=$RUSER:R=$ROLE:"
     exit 0
@@ -188,14 +195,22 @@ if [ "$1" = curse ]; then
 	echo "You are not the administrative remop user '$REMOPUSER'"
 	exit 1
     fi
-
+    [ -d $REMOPDIR/state ] || mkdir -p $REMOPDIR/state
+    
     RUSER="$2"
     ROLE="$3"
     F=/tmp/keylst.$$
 
     rm -f $REMOPDIR/keys/$RUSER/$ROLE/key.pub $REMOPDIR/keys/$RUSER/$ROLE/key.pub.sig
     
+    read SERIAL < $REMOPDIR/state/keylist.serial
+    SERIAL=${SERIAL:-1}
+    SERIAL=$[ SERIAL + 1 ]
+    echo $SERIAL > $REMOPDIR/state/keylist.serial
+    
     grep -v "^$RUSER:$ROLE:" $REMOPDIR/keylist > $F
+    echo "::$SERIAL" >> $F
+    
     cp $F $REMOPDIR/keylist
     openssl dgst -sha512 -sign $REMOPDIR/etc/key.pem -out $REMOPDIR/keylist.sig $REMOPDIR/keylist
 

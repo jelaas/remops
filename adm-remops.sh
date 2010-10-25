@@ -96,8 +96,8 @@ function sync_new {
     local L U R
 
     while read L; do
-	U=$(echo $L|cut -d : -f 1)
-	R=$(echo $L|cut -d : -f 2)
+	U="$(echo $L|cut -d : -f 1)"
+	R="$(echo $L|cut -d : -f 2)"
 	if [ ! -f $HOME/remops/roles/$R/managed_keys/$U ]; then
 	    echo "N $U:$R"
 	fi
@@ -106,6 +106,8 @@ function sync_new {
 
 function sync_check {
     local U R D
+
+    [ -d $HOME/remops/state ] || mkdir -p $HOME/remops/state
     
     [ -f $HOME/remops/etc/ops_base_url ] || exit 1
     read BASEURL < $HOME/remops/etc/ops_base_url
@@ -132,6 +134,19 @@ function sync_check {
 	exit 1
     fi
 
+    read LSERIAL < $HOME/remops/state/keylist.serial
+    LSERIAL=${LSERIAL:-1}
+
+    # Extract latest serialnumber
+    RSERIAL="$(tail -n 1 $F|cut -d : -f 3)"
+    RSERIAL=${RSERIAL:-0}
+    if [ "$RSERIAL" -lt "$LSERIAL" ]; then
+	echo "Old serialnumber encountered: '$RSERIAL'"
+	echo "Latest serialnumber is '$LSERIAL'"
+	exit 1
+    fi
+    echo $RSERIAL > $HOME/remops/state/keylist.serial
+    
     # Compare locally managed keys with central keylist
     cat $F|sync_new
 
@@ -159,6 +174,7 @@ function sync_do {
 
 function sync_now {
     [ -f $HOME/remops/etc/ops_base_url ] || exit 1
+    [ -d $HOME/remops/state ] || mkdir -p $HOME/remops/state
     
     sync_check|sync_do
     echo "Do not forget to commit the changes!"
@@ -209,6 +225,8 @@ function do_list {
 if [ "$1" = init -a "$2" ]; then
     URL="$2/etc/pubkey.pem"
     if wget -q -O /dev/null $URL; then
+	mkdir -p $HOME/remops/state
+	echo 0 > $HOME/remops/state/keylist.serial
 	mkdir -p $HOME/remops/etc
 	mkdir -p $HOME/remops/roles/public/cmd
 	echo "$2" > $HOME/remops/etc/ops_base_url
