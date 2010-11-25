@@ -66,7 +66,7 @@ if [ ! -f "$REMOPS/roles/$RROLE/cmd/$CMD" ]; then
     if [ ! -f "$REMOPS/roles/public/cmd/$CMD" ]; then
 	if [ "${CMD: -8}" != '-options' ]; then
 	    logger -i -t remops -p syslog.info ":ERR=NOCMD:U=$RUSER:R=$RROLE:C=$CMD:"
-	    echo "Invalid command '$CMD'" >&2
+	    echo "Invalid command '$CMD' for role $RROLE" >&2
 	fi
 	exit 2
     fi
