@@ -122,7 +122,7 @@ if [ "$1" = list ]; then
     for d in $REMOPDIR/keys/*; do
 	echo "User $(basename $d):"
 	for f in $d/*; do
-	    echo " $(basename $f)"
+	    [ -f "$f/key.pub" ] && echo " $(basename $f)"
 	done
     done
     exit 0
