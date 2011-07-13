@@ -21,6 +21,7 @@ In remops we have one machine/server for centralized management. This is referre
 
 Access administration is performed centrally on the operations server (managed keys) or locally on the destination server (manual keys).
 
+Remops can also handle key distribution to ordinary accounts. This is done via the special 'magic' role called 'account'. If a key belongs to the user role 'account' and the user has an account on the server, the key will be added to the users 'authorized_keys' file (for SSH access).
 
 Administration of access to destination server
 ==============================================
