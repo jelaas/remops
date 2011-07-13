@@ -191,7 +191,8 @@ function commit {
 		echo "$(cat $f) remop-account" >> $UF
 		cp -f $UF ${UH}/.ssh/authorized_keys
 		rm -f $UF
-		chmod 0400 ${UH}/.ssh
+		chmod 0600 ${UH}/.ssh/authorized_keys
+		chown $U -R ${UH}/.ssh
 	    fi
 	else
 	    echo -n "command=\"$BINDIR/remops $U $R\",no-port-forwarding " >> $F
