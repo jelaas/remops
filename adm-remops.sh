@@ -176,8 +176,27 @@ function commit {
 	R="$(dirname $f)"
 	R="$(dirname $R)"
 	R="$(basename $R)"
-	echo -n "command=\"$BINDIR/remops $U $R\",no-port-forwarding " >> $F
-	cat $f >> $F
+	if [ "$R" = account ]; then
+	    # Specially treated role 'account'
+	    UH=$(getent passwd $U|cut -f 6 -d :)
+	    if [ "$UH" -a -d "$UH" ]; then
+		UF=/tmp/account-keys.$U.$$
+		if [ -f ${UH}/.ssh/authorized_keys ]; then
+		    grep -v remop-account ${UH}/.ssh/authorized_keys > $UF
+		else
+		    cp /dev/null $UF
+		fi
+		mkdir -p ${UH}/.ssh
+		chmod 0700 ${UH}/.ssh
+		echo "$(cat $f) remop-account" >> $UF
+		cp -f $UF ${UH}/.ssh/authorized_keys
+		rm -f $UF
+		chmod 0400 ${UH}/.ssh
+	    fi
+	else
+	    echo -n "command=\"$BINDIR/remops $U $R\",no-port-forwarding " >> $F
+	    cat $f >> $F
+	fi
     done
     cp $F $HOME/.ssh/authorized_keys
     rm -f $F
