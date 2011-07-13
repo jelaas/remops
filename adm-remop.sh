@@ -104,6 +104,8 @@ if [ "$1" = req ]; then
     fi
     
     cp -p "$KEY" $REMOPDIR/req/req.$RUSER.$ROLE.pub.$RND || exit 1
+    # make sure the remop administration user can read the key
+    chmod a+r $REMOPDIR/req/req.$RUSER.$ROLE.pub.$RND
     logger -i -t adm-remop -p syslog.info ":A=req:U=$RUSER:R=$ROLE:KEY=$KEY:"
     exit 0
 fi
