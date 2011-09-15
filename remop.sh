@@ -40,7 +40,7 @@ shift
 # Command is now $@
 
 if [ ! -d "$KEYS/$RUSER/$ROLE" ]; then
-    echo "You ($RUSER) do not possess role '$ROLE'."
+    echo "You ($RUSER) do not possess role '$ROLE'." 1>&2
     exit 1
 fi
 
