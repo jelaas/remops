@@ -111,8 +111,9 @@ if [ "$1" = req ]; then
 fi
 
 if [ "$1" = reqlist ]; then
-    for f in $REMOPDIR/req/req.*; do
+    for f in $REMOPDIR/req/req.* EOF; do
 	[ -f "$f" ] || continue
+	[ "$f" = EOF ] && continue
 	RUSER="$(echo $f|cut -d . -f 2)"
 	ROLE="$(echo $f|cut -d . -f 3)"
 	echo "$RUSER($(stat -c %U $f)) $ROLE $(stat -c %y $f)"
