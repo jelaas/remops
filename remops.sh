@@ -14,18 +14,6 @@
 
 VERSION=VERSION
 
-if [ -z "$HOME" ]; then
-    logger -i -t remops -p syslog.info ":ERR=NOHOME:U=$RUSER:R=$RROLE:C=$CMD:"
-    exit 2 # HOME needs to be set
-fi
-
-REMOPS=$HOME/remops
-if [ ! -d "$REMOPS" ]; then
-    mkdir -p $REMOPS/roles/public/cmd
-    mkdir -p $REMOPS/roles/public/managed_keys
-    mkdir -p $REMOPS/roles/public/manual_keys
-fi
-
 if [ -z "$1" ]; then
     cat <<EOF
 remops <user> <role>
@@ -36,11 +24,23 @@ EOF
 fi
 
 RUSER="$1"
-RROLE="$2"
+ROLES="$2"
 CMD="${SSH_ORIGINAL_COMMAND%% *}" # first word before space
 
+if [ -z "$HOME" ]; then
+    logger -i -t remops -p syslog.info ":ERR=NOHOME:U=$RUSER:R=$ROLES:C=$CMD:"
+    exit 2 # HOME needs to be set
+fi
+
+REMOPS=$HOME/remops
+if [ ! -d "$REMOPS" ]; then
+    mkdir -p $REMOPS/roles/public/cmd
+    mkdir -p $REMOPS/roles/public/managed_keys
+    mkdir -p $REMOPS/roles/public/manual_keys
+fi
+
 if [ "$CMD" = list ]; then
-    logger -i -t remops -p syslog.info ":A=builtin:U=$RUSER:R=$RROLE:C=$CMD:"
+    logger -i -t remops -p syslog.info ":A=builtin:U=$RUSER:R=$ROLES:C=$CMD:"
     echo "public:list:list all available commands:"
     for d in $REMOPS/roles/*; do
 	for f in $d/cmd/*; do
@@ -57,15 +57,22 @@ if [ "$CMD" = list ]; then
     exit 0
 fi
 
-if [ ! -d "$REMOPS/roles/$RROLE" ]; then
-    logger -i -t remops -p syslog.info ":ERR=NOROLE:U=$RUSER:R=$RROLE:C=$CMD:"
-fi
+for RROLE in ${ROLES//,/ }; do
+    if [ ! -d "$REMOPS/roles/$RROLE" ]; then
+	logger -i -t remops -p syslog.info ":ERR=NOROLE:U=$RUSER:R=$RROLE:C=$CMD:"
+    fi
+done
 
-if [ ! -f "$REMOPS/roles/$RROLE/cmd/$CMD" ]; then
+FOUND=no
+for RROLE in ${ROLES//,/ }; do
+    [ -f "$REMOPS/roles/$RROLE/cmd/$CMD" ] && FOUND=yes && break
+done
+
+if [ "$FOUND" != yes ]; then
     if [ ! -f "$REMOPS/roles/public/cmd/$CMD" ]; then
 	if [ "${CMD: -8}" != '-options' ]; then
-	    logger -i -t remops -p syslog.info ":ERR=NOCMD:U=$RUSER:R=$RROLE:C=$CMD:"
-	    echo "Invalid command '$CMD' for role $RROLE" >&2
+	    logger -i -t remops -p syslog.info ":ERR=NOCMD:U=$RUSER:R=$ROLES:C=$CMD:"
+	    echo "Invalid command '$CMD' for role(s) $ROLES" >&2
 	fi
 	exit 2
     fi
