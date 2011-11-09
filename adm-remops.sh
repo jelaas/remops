@@ -182,9 +182,9 @@ function commit {
 	R="$(basename $R)"
 	[ "$R" = account ] && continue
 	if [ -f $D/${HASH}.roles ]; then
-	    echo ",$R" >> $D/${HASH}.roles
+	    echo -n ",$R" >> $D/${HASH}.roles
 	else
-	    echo $R >> $D/${HASH}.roles
+	    echo -n $R >> $D/${HASH}.roles
 	fi
     done
     
