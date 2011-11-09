@@ -167,11 +167,30 @@ function sync_now {
 
 function commit {
     F=/tmp/akeys.$$
+    D=/tmp/akeysdir.$$
+    mkdir -p $D
     mkdir -p $HOME/.ssh
     chmod 0700 $HOME/.ssh
     grep -sv remops $HOME/.ssh/authorized_keys > $F
+    
     for f in $HOME/remops/roles/*/managed_keys/* $HOME/remops/roles/*/manual_keys/*; do
 	[ -f "$f" ] || continue
+	HASH=$(md5sum $f|cut -d ' ' -f 1)
+	cp $f $D/$HASH
+	R="$(dirname $f)"
+	R="$(dirname $R)"
+	R="$(basename $R)"
+	[ "$R" = account ] && continue
+	if [ -f $D/${HASH}.roles ]; then
+	    echo ",$R" >> $D/${HASH}.roles
+	else
+	    echo $R >> $D/${HASH}.roles
+	fi
+    done
+    
+    for f in $HOME/remops/roles/*/managed_keys/* $HOME/remops/roles/*/manual_keys/*; do
+	[ -f "$f" ] || continue
+	HASH=$(md5sum $f|cut -d ' ' -f 1)
 	U="$(basename $f)"
 	R="$(dirname $f)"
 	R="$(dirname $R)"
@@ -195,12 +214,14 @@ function commit {
 		chown $U -R ${UH}/.ssh
 	    fi
 	else
-	    echo -n "command=\"$BINDIR/remops $U $R\",no-port-forwarding " >> $F
+	    read ROLES < $D/${HASH}.roles
+	    echo -n "command=\"$BINDIR/remops $U $ROLES\",no-port-forwarding " >> $F
 	    cat $f >> $F
 	fi
     done
     cp $F $HOME/.ssh/authorized_keys
     rm -f $F
+    rm -rf $D
     return 0
 }
 
