@@ -37,6 +37,8 @@
 #?install:	installops installdst
 #?clean:
 #?	rm -f $(prgops) $(prgdst)
+#?rpm:
+#?	bar -c --license=GPLv2+ --version $V --release 1 --name remops --prefix=/usr/bin --fgroup=root --fuser=root remops-$V-1.rpm remops adm-remops
 #?tarball:	clean
 #?	make-tarball.sh
 PREFIX= /usr
@@ -71,5 +73,7 @@ installdst:	$(prgdst)
 install:	installops installdst
 clean:
 	rm -f $(prgops) $(prgdst)
+rpm:
+	bar -c --license=GPLv2+ --version $V --release 1 --name remops --prefix=/usr/bin --fgroup=root --fuser=root remops-$V-1.rpm remops adm-remops
 tarball:	clean
 	make-tarball.sh
