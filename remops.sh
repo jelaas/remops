@@ -80,5 +80,5 @@ if [ "$FOUND" != yes ]; then
 fi
 CMDARG="${SSH_ORIGINAL_COMMAND:${#CMD}}"
 logger -i -t remops -p syslog.info ":A=exec:U=$RUSER:R=$RROLE:C=$CMD:ARGS=$CMDARG:"
-
+GLOBIGNORE=*
 $REMOPS/roles/$RROLE/cmd/$CMD $CMDARG
